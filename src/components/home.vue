@@ -48,9 +48,12 @@ export default {
         }
     },
     created() {
-        const currUrl = window.location.pathname.split('/')
-        if(currUrl[1]){
-          this.goToUrl(currUrl[1]);
+        const currUrl = window.location.pathname.split('/');
+        if(currUrl[1] !== '' && currUrl[3]){
+          this.goToUrl(currUrl[3]);
+        }
+        else if(currUrl[1] !== ''){
+            this.goToUrl(currUrl[1])
         }
     },
 }
