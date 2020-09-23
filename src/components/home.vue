@@ -5,9 +5,9 @@
       <form class="form-inline">
       <div class="form-group mx-sm-3 mb-2">
         <label for="longUrl" class="sr-only">Long url</label>
-        <input type="url" class="form-control" id="longUrl" placeholder="long url goes here">
+        <input type="url" v-model="longUrl" class="form-control" id="longUrl" placeholder="long url goes here">
       </div>
-      <button class="btn btn-primary mb-2">Shrink</button>
+      <button @click.prevent="sendNewUrl()" class="btn btn-primary mb-2">Shrink</button>
     </form>
     <table class="mt-5 table table-striped">
   <thead>
@@ -18,7 +18,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr v-for="url of items" v-bind:key="url.id" v-bind:todo="url.id">
+    <tr v-for="(url, index) of items" v-bind:key="index">
       <td><a v-bind:href="url.longUrl">{{url.longUrl}}</a></td>
       <td><a v-bind:href="url.shortUrl">{{url.shortUrl}}</a></td>
       <td>{{url.clicks}}</td>
@@ -36,6 +36,8 @@ export default {
   },
   data(){
     return {
+      baseUrl: 'https://urlshortenerbackend.herokuapp.com',
+      longUrl: '',
       items: [],
       form: {}
     }
@@ -44,22 +46,35 @@ export default {
        async getAllUrls(){
          const allUrls =[];
          try {
-           const res = await this.$http.get('https://urlshortenerbackend.herokuapp.com/');
+           const res = await this.$http.get(this.baseUrl);
            const data = res.data;
             data.forEach(data => {
              const url = {
                longUrl: data.full,
                shortUrl: data.short,
                clicks: data.clicks,
-               id: data._id
              }
-             allUrls.push(url);
+             allUrls.unshift(url);
            })
             this.items = allUrls;
          }
           catch(err) {
             console.log(err)
           }
+        },
+        async sendNewUrl(){
+          const payload = {
+            full: this.longUrl
+          }
+            try{
+              const res =  await this.$http.post(`${this.baseUrl}/shortUrls`, payload);
+              const data = res.data;
+              console.log(data);
+              this.getAllUrls();
+            }
+            catch(err){
+              console.log(err);
+            }
         }
     },
     created() {
