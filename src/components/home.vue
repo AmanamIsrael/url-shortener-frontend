@@ -1,30 +1,15 @@
 <template>
   <div>
     <div class="container mt-4">
-      <h1 class="mb-4">Url Shortener</h1>
-      <form class="form-inline">
+      <h1 class="mb-4 text-center">Url Shortener</h1>
+      <form>
       <div class="form-group mx-sm-3 mb-2">
         <label for="longUrl" class="sr-only">Long url</label>
-        <input type="url" v-model="longUrl" class="form-control" id="longUrl" placeholder="long url goes here">
+        <textarea type="url" v-model="longUrl" class="form-control" id="longUrl" placeholder="long url goes here"></textarea>
       </div>
-      <button @click.prevent="sendNewUrl()" class="btn btn-primary mb-2">Shrink</button>
+      <button @click.prevent="sendNewUrl()" class="d-block mx-auto btn btn-primary mb-2">Shrink</button>
     </form>
-    <table class="mt-5 table table-striped">
-  <thead>
-    <tr>
-      <th scope="col">Long Url</th>
-      <th scope="col">Short Url</th>
-      <th scope="col">clicks</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-for="(url, index) of items" v-bind:key="index">
-      <td><a v-bind:href="url.longUrl">{{url.longUrl}}</a></td>
-      <td><a v-bind:href="url.shortUrl">{{url.shortUrl}}</a></td>
-      <td>{{url.clicks}}</td>
-    </tr>
-  </tbody>
-</table>
+    <h6 v-if="shortUrl !== ''">Your Short Url:</h6><a v-bind:href="shortUrl">{{shortUrl}}</a>
     </div>
   </div>
 </template>
@@ -38,30 +23,11 @@ export default {
     return {
       baseUrl: 'https://urlshortenerbackend.herokuapp.com',
       longUrl: '',
-      items: [],
+      shortUrl: '',
       form: {}
     }
   },
     methods: {
-       async getAllUrls(){
-         const allUrls =[];
-         try {
-           const res = await this.$http.get(this.baseUrl);
-           const data = res.data;
-            data.forEach(data => {
-             const url = {
-               longUrl: data.full,
-               shortUrl: data.short,
-               clicks: data.clicks,
-             }
-             allUrls.unshift(url);
-           })
-            this.items = allUrls;
-         }
-          catch(err) {
-            console.log(err)
-          }
-        },
         async sendNewUrl(){
           const payload = {
             full: this.longUrl
@@ -69,20 +35,30 @@ export default {
             try{
               const res =  await this.$http.post(`${this.baseUrl}/shortUrls`, payload);
               const data = res.data;
-              console.log(data);
-              this.getAllUrls();
+              this.shortUrl = data.short;
             }
             catch(err){
               console.log(err);
             }
+        },
+        async goToUrl(url){
+          const res = await this.$http.get(`${this.baseUrl}/${url}`);
+          console.log(res.data);
+          window.location.href = res.data;
         }
     },
     created() {
-        this.getAllUrls();
+        const currUrl = window.location.pathname.split('/')
+        if(currUrl[1]){
+          this.goToUrl(currUrl[1]);
+        }
     },
 }
 </script>
 
 <style scoped>
-
+  .shorturl:hover{
+    cursor: pointer;
+    text-decoration: underline;
+  }
 </style>
