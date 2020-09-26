@@ -44,8 +44,8 @@ export default {
         async goToUrl(url){
           const res = await this.$http.get(`${this.baseUrl}/${url}`);
           console.log(res.data);
-          window.location.href = res.data;
-          // window.open(res.data);
+          // window.location.href = res.data;
+          window.open(res.data, '_blank');
         }
     },
     created() {
